@@ -1,0 +1,19 @@
+\documentclass[11pt]{article}
+
+\usepackage{pdfpages}
+\usepackage{mystyle}
+\pagestyle{plain}
+\includepdfset{pagecommand={\thispagestyle{plain}}}
+
+\title{Combining some PDFs}
+\author{James Zuber}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\includepdf[pages=-]{airplane.pdf}
+\includepdf[pages=-]{waiter1D.pdf}
+\includepdf[pages=-]{intervals.pdf}
+
+\end{document}
