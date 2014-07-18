@@ -95,7 +95,7 @@ Also note that while this required only 2 swaps (the lowest possible for this in
 
 \subsection{Limited Family Size Simplification}
 
-While the general case allows passengers to fly together in arbitrarially large, heterogeneous groups, finding the optimal number of swaps in that case is NP-complete (see \ref{sec:hardness}).  Because of this, we simplify the number of people who can belong to a family in two ways: either we limit the maximum family size in a heterogeneous assortment of families, or we demand all families be the same size.  
+While the general case allows passengers to fly together in arbitrarially large, heterogeneous groups, finding the optimal number of swaps in that case is NP-complete (see section \ref{sec:hardness}).  Because of this, we simplify the number of people who can belong to a family in two ways: either we limit the maximum family size in a heterogeneous assortment of families, or we demand all families be the same size.  
 
 \section{Hardness} \label{sec:hardness}
 
@@ -222,7 +222,7 @@ We have only proven that there exists a left to right sweep algorithm that will 
 
 First, because the plane is full of couples, each pair of aligned adjacent seats (where aligned means the first is an odd numbered seat and the second an even numbered seat) will hold a matched couple in the final arrangement.  Any pair of seats in the initial seating arrangement that is not occupied by a matched couple will require at least one exchange to remedy that.
 
-Second, any sweep algorithm will start with the leftmost aligned pair of seats containing a mismatched couple and swap one of those two inhabitants with another passenger in the plane.  Once we prove below that all exchange choices leave the plane in a state that requires the same number of swaps, we can claim that our sweep algorithm is trivial.
+Second, any sweep algorithm will start with the leftmost aligned pair of seats containing a mismatched couple and swap one of those two inhabitants with another passenger in the plane.  Once we prove below that all exchange choices leave the plane in a state that requires the same number of swaps, we can claim that our sweep algorithm is optimal.
 
 \begin{lem} \label{lem:identicalToRelabel}
 All exchanges that make one couple happy are equivalent up to a relabeling.
@@ -332,7 +332,7 @@ Since all sweep algorithms that make at least one couple happy with every exchan
 
 \section{Mixed families -- couples and singletons}
 
-Let us now consider the case where we have a mixture of couples and singletons, where we want to seat all the couples together. We assume that singletons are always happy, irrespective of whom they sit next to.
+Let us now consider the case where we have a mixture of couples and singletons, where we want to seat all of the couples together. We assume that singletons are always happy, regardless of whom they sit next to.
 
 \subsection{Phase One, determining structure:} 
 
@@ -412,7 +412,7 @@ To properly assign a structure to a seating arangement for singletons and couple
 \end{tikzpicture}
 \end{figure}
 
-To fully represent a starting seating arrangement, we must note which passengers are not in blocks, contigious seats thus occupied will be called gaps.  While al blocks will be of even length (because they're comprised of couples), gaps can be of even or odd length.  I will refer to the parity of a gap as odd or even depending on whether the number of elements in it are odd or even.
+To fully represent a starting seating arrangement, we must note which passengers are not in blocks, contigious seats thus occupied will be called gaps.  While all blocks will be of even length (because they're comprised of couples), gaps can be of even or odd length.  I will refer to the parity of a gap as odd or even depending on whether the number of elements in it are odd or even.
 
 \begin{lem} \label{lemma:ParityOnly}
 For each starting block of size $N_i$, the optimal structural assignment will have a contiguous block of $N_i$ coupled seats. These can either be at the starting location or offset from that position by 1.
