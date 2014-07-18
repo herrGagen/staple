@@ -268,7 +268,7 @@ Exact same argument as above.
 
 We've seen that the worst remainder we can achieve for 3 defects being covered with 3 explanations is $\frac23$.  This means greedy will score at least $\frac79$ of optimal.  Note: in figure~\ref{fig:k3}, only one of the three $\frac13$ gray explanations is chosen.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \begin{tikzpicture}[xscale=1,yscale=.5]
 
 \fill[black] (1,4) rectangle (7,4.4);
@@ -549,7 +549,7 @@ Unfortunately, this is worse than our greedy bound of $(1- \frac{1}{e})$.
 For dynamic programs of depth $d \geq 2$, our state is slightly more complicated than it was for depth 1. We have $k$, the number of explanations used, $a$ the end of the solved region, $b$ the end of the active region and $S$, the left endpoints of the set of explanations that are active (there are up to $k$ of them) at point $b$ to form $DS(k,a,b,S)$.
 
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \begin{tikzpicture}[xscale=1,yscale=.25]
 
 \draw (4,0) rectangle (6,0.8);
@@ -1107,7 +1107,7 @@ The clear winner was binary programming (not shown).  In all but 4 of the genome
 
 To illustrate algorithm running times on smallscale problems, we generated 1024 random defect sets of size $N \in \{4 8 16\}$ and had each algorithm place $K = \{ N, N/2, N/4\}$ explanations.  The timing results follow:
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \begin{tikzpicture}[yscale=.8]
     \begin{axis}[ title={Log(Time) in seconds, $N=4$}, 
         ymode=log,
@@ -1129,7 +1129,7 @@ To illustrate algorithm running times on smallscale problems, we generated 1024 
 
 Even for small cases, the depth 2 dynamic program is more than 10 times slower than any other algorithm.  Since it scales as $O(kn^{2+k})$, this algorithm will quickly become impractical.  We will devote a chart to its scaling, but omit it from the rest of the timing plots.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \begin{tikzpicture}[yscale=.8]
     \begin{axis}[ title={Time in seconds, $N=8$}, 
         xlabel=k,
@@ -1146,7 +1146,7 @@ Even for small cases, the depth 2 dynamic program is more than 10 times slower t
   \caption{Time to place $k$ explanations to cover 8 defects.}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \begin{tikzpicture}[yscale=.8]
     \begin{axis}[ title={Time in seconds, $N=16$}, 
         xlabel=k,
@@ -1163,7 +1163,7 @@ Even for small cases, the depth 2 dynamic program is more than 10 times slower t
   \caption{Time to place $k$ explanations to cover 16 defects.}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \begin{tikzpicture}[yscale=.8]
     \begin{axis}[ title={Time in minutes, $N=32$}, 
         xlabel=k,
@@ -1187,7 +1187,7 @@ A log-log linear regression on the $k$ dependence of the 1-OPT algorithm shows t
 
 \subsubsection{2-Depth DP Timing}
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \begin{tikzpicture}[yscale=.8]
     \begin{axis}[ title={Normalized time vs. $k$}, 
         xlabel=k,
@@ -1204,7 +1204,7 @@ A log-log linear regression on the $k$ dependence of the 1-OPT algorithm shows t
 
 The running time dependence on $k$ for the 2-Depth dynamic program is exactly as it should be: linear.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \begin{tikzpicture}[yscale=.8]
     \begin{axis}[ title={Time in seconds}, 
         xlabel=N,
