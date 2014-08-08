@@ -315,7 +315,572 @@ Leave the remaining passengers' seating locations equivalent.
 \end{frame}
 
 \section[DNA]{Genetic Intervals}
-\begin{frame}\frametitle{DNA Copy Analysis}
+\begin{frame}[t]{DNA Copy Analysis}
+  \begin{figure}[H] 
+    \begin{tikzpicture}[scale=1]
+
+      % We want 5 rectangles that look like:
+      %     2222222222       4444444444444444
+      % 1111111   33333333       55555555
+      \draw (0,0) rectangle (.6,.4);
+      \fill[green] (0,0) rectangle (.6,.4);
+      \node[green] at (0,-.1) [above left] {$D_1$};
+
+      \draw (.2,.5) rectangle (1.8,.9);
+      \fill[green] (.2,.5) rectangle (1.8,.9);
+      \node[green] at (.2,.4) [above left] {$D_2$};
+
+      \draw (1.25,0) rectangle (2,.4);
+      \fill[green] (1.25,0) rectangle (2,.4);
+      \node[green] at (1.25,-.1) [above left] {$D_3$};
+
+      \draw (2.5,.5) rectangle (4.5,.9);
+      \fill[green] (2.5,.5) rectangle (4.5,.9);
+      \node[green] at (2.5,.4) [above left] {$D_4$};
+
+      \draw (3,0) rectangle (4,.4);
+      \fill[green] (3,0) rectangle (4,.4);
+      \node[green] at (3,-.1) [above left] {$D_5$};
+
+    \end{tikzpicture} 
+    \caption{Simple 5 defect example}
+  \end{figure}
+
+  \begin{itemize}
+  \item Cancer patients' genomes are 1D objects, i.e. lines.
+  \item Closed intervals along that line have genetic abnormalities, and are labeled ``defects.''
+  \item Goal: Across a number of patients, identify the $k$ most promising common regions.
+  \end{itemize}
+
+
+\end{frame}
+
+\begin{frame}[t]{Explaining / Scoring}
+  \begin{figure}[H] 
+    \begin{tikzpicture}[scale=1]
+
+      % We want 5 rectangles that look like:
+      %     2222222222       4444444444444444
+      % 1111111   33333333       55555555
+      \draw (0,0) rectangle (.5,.4);
+      \fill[green] (0,0) rectangle (.5,.4);
+      \node[green] at (0,-.1) [above left] {$D_1$};
+
+      \draw (.2,.5) rectangle (1.8,.9);
+      \fill[green] (.2,.5) rectangle (1.8,.9);
+      \node[green] at (.2,.4) [above left] {$D_2$};
+
+      \draw (1.25,0) rectangle (2,.4);
+      \fill[green] (1.25,0) rectangle (2,.4);
+      \node[green] at (1.25,-.1) [above left] {$D_3$};
+
+      \draw (2.5,.5) rectangle (4.5,.9);
+      \fill[green] (2.5,.5) rectangle (4.5,.9);
+      \node[green] at (2.5,.4) [above left] {$D_4$};
+
+      \draw (3,0) rectangle (4,.4);
+      \fill[green] (3,0) rectangle (4,.4);
+      \node[green] at (3,-.1) [above left] {$D_5$};
+
+      %Now draw some explanations
+
+      %% Extends past D_1, scoring only on D_2
+      \draw (.2,-.5) rectangle (.7,-.1);
+      \fill[red] (.2,-.5) rectangle (.7,-.1);
+      \node[red] at (.2,-.6) [above left] {$E_1$};
+
+      \fill[yellow] (.2,.5) rectangle (.7,.9);
+
+      % Overlape D_2 and D_3
+      \draw (1.25,-.5) rectangle (1.8,-.1);
+      \fill[red] (1.25,-.5) rectangle (1.8,-.1);
+      \node[red] at (1.3,-.6) [above left] {$E_2$};
+
+      \fill[yellow] (1.25,.5) rectangle (1.8,.9);
+      \fill[yellow] (1.25,0) rectangle (1.8,.4);
+      %% Extends past D_5, scoring only on D_4
+      \draw (3,-.5) rectangle (4.5,-.1);
+      \fill[red] (3,-.5) rectangle (4.5,-.1);
+      \node[red] at (3,-.6) [above left] {$E_3$};
+
+      \fill[yellow] (3,.5) rectangle (4.5,.9);
+
+    \end{tikzpicture}
+  \end{figure}
+
+  \only<1>{
+    Given a set $D$ of defects, find a set $E$ of $k$ closed intervals, or \textit{explanations}, maximizing:
+
+    \begin{equation*}
+      \sum_{D_j \in D}  \Big|\bigcup_{(E_i \in E) \cap (E_i \subseteq D_j)} E_i \Big| \frac{1}{|D_j|}
+    \end{equation*}
+  }
+
+  \only<2->{
+    \begin{itemize}
+    \item An explanation explains a defect iff it is a subset of that defect.
+    \item A specific region of a defect can only be explained once.
+    \item An explanation can explain portions of multiple defects.
+    \item A defect can be explained by multiple explanations.
+    \item Maximum score per defect is 1.
+    \end{itemize}
+  }
+
+\end{frame}
+
+\begin{frame}{Maximal Explanations}
+
+  \only<1>{
+    How many explanations do we have to consider when finding the optimal set?  
+  }
+
+  \only<2>{
+    The explanation $E_1$ only explains $D_1$, but better scoring explanations exist which also explain $D_1$.
+  }
+
+  \only<3>{
+    The new explanation $E_2$ is formed by moving the left endpoint of $E_1$ until it matches the left endpoint of $D_1$.
+  }
+
+  \only<4>{
+    We further improve $E_3$ to become a maximal explanation by making its right endpoint match the right endpoint of $D_1$.
+  }
+
+  \only<5>{
+    The explanation $E_4$ is trivially non-maximal: it does not explain any defect at all.
+  }
+
+  \only<6>{
+    $E_5$ is also maximal: its left endpoint is the left endpoint of $D_3$ and its right endpoint matches $D_6$.
+  }
+
+  \only<7>{
+    Maximal explanations start and end at defect endpoints.  There are $O(n^2)$ maximal explanations for any defect set.
+  }
+
+  \begin{figure}[H]
+    \begin{tikzpicture}[scale=1]
+
+      \uncover<1-> {
+        \draw (0,0) rectangle (3,.4);
+        \fill[green] (0,0) rectangle (3,.4);
+        \node[green] at (0,-.1) [above left] {$D_1$};
+
+        \draw (2,.5) rectangle (5,.9);
+        \fill[green] (2,.5) rectangle (5,.9);
+        \node[green] at (2,.4) [above left] {$D_2$};
+
+        \draw (4,0) rectangle (7,.4);
+        \fill[green] (4,0) rectangle (7,.4);
+        \node[green] at (4,-.1) [above left] {$D_3$};
+      }
+
+      \uncover<2> {
+
+        \draw (.3,1) rectangle (2.3,1.4);
+        \fill[red] (0.3,1) rectangle (2.3,1.4);
+        \node[red] at (0.3,.9) [above left] {$E_1$};
+
+        \fill[yellow] (.3,0) rectangle (2.3,.4);
+      }
+
+      \uncover<3>  {
+
+        \draw (0,1) rectangle (2.3,1.4);
+        \fill[red] (0,1) rectangle (2.3,1.4);
+        \node[red] at (0,.9) [above left] {$E_2$};
+
+        \fill[yellow] (0,0) rectangle (2.3,.4);
+      }
+
+      \uncover<4,7-> {
+
+        \draw (0,1) rectangle (3,1.4);
+        \fill[red] (0,1) rectangle (3,1.4);
+        \node[red] at (0,.9) [above left] {$E_3$};
+
+        \fill[yellow] (0,0) rectangle (3,.4);
+      }
+
+      \uncover<5> {
+
+        \draw (3.2,1) rectangle (6,1.4);
+        \fill[red] (3.2,1) rectangle (6,1.4);
+        \node[red] at (3.2,.9) [above left] {$E_4$};
+      }
+
+      \uncover<6-> {
+
+        \draw (4,1) rectangle (5,1.4);
+        \fill[red] (4,1) rectangle (5,1.4);
+        \node[red] at (4,.9) [above left] {$E_5$};
+
+        \fill[yellow] (4,0) rectangle (5,.4);
+        \fill[yellow] (4,.5) rectangle (5,.9);
+      }
+
+    \end{tikzpicture}
+  \end{figure}
+
+\end{frame}
+
+\begin{frame}[t]{Greedy Algorithm}
+
+  \begin{figure}[H]
+    \begin{tikzpicture}[scale=1]
+
+      % We want
+      %     2222222222
+      % 1111111
+
+
+      \uncover<1->{
+        \draw (0,0) rectangle (2,.4);
+        \fill[green] (0,0) rectangle (2,.4);
+        \node[green] at (0,-.1) [above left] {$D_1$};
+
+        \draw (1,.5) rectangle (3,.9);
+        \fill[green] (1,.5) rectangle (3,.9);
+        \node[green] at (1,.4) [above left] {$D_2$};
+      }
+
+      \uncover<2>{
+        \draw (0,1) rectangle (2,1.4);
+        \fill[red] (0,1) rectangle (2,1.4);
+        \node[red] at (0,.9) [above left] {$E_1$};
+
+
+        \draw (1,1.5) rectangle (3,1.9);
+        \fill[red] (1,1.5) rectangle (3,1.9);
+        \node[red] at (1,1.4) [above left] {$E_2$};
+
+        \fill[yellow] (0,0) rectangle (2,.4);
+        \fill[yellow] (1,.5) rectangle (3,.9);  
+      }
+
+      \uncover<3->{
+        \draw (1,1) rectangle (2,1.4);
+        \fill[red] (1,1) rectangle (2,1.4);
+        \node[red] at (1,.9) [above left] {$E_3$};
+
+        \fill[yellow] (1,0) rectangle (2,.4);
+        \fill[yellow] (1,.5) rectangle (2,.9);
+        
+      }
+
+      \uncover<4->{
+        \draw (2,1) rectangle (3,1.4);
+        \fill[red] (2,1) rectangle (3,1.4);
+        \node[red] at (3,.9) [above right] {$E_2$};
+
+        \fill[yellow] (2,.5) rectangle (3,.9);
+        
+      }
+    \end{tikzpicture} 
+  \end{figure}
+
+  This is the simplest example where Greedy is non-optimal:
+
+  \only<2>{
+    When we allow 2 explanations to cover 2 defects, the obvious correct answer is $E_1 = D_1$ and $E_2 = D_2$.
+  }
+
+  \only<3->{
+    However, in the first step of greedy, we select the high scoring center region.
+  }
+
+  \only<4->{
+    This leaves us with lower scoring side regions for our next selection.  Greedy only scored $\frac34$ of the maximum attainable score by making a bad first selection.
+  }
+\end{frame}
+
+\begin{frame}[t]{1-OPT Exchange Algorithm}
+
+  \begin{figure}[H]
+    \begin{tikzpicture}[scale=1]
+
+      % We want
+      %     2222222222
+      % 1111111
+
+
+      \draw (0,0) rectangle (2,.4);
+      \fill[green] (0,0) rectangle (2,.4);
+      \node[green] at (0,-.1) [above left] {$D_1$};
+
+      \draw (1,.5) rectangle (3,.9);
+      \fill[green] (1,.5) rectangle (3,.9);
+      \node[green] at (1,.4) [above left] {$D_2$};
+
+      \uncover<1,2,3>{
+        \draw (1,1) rectangle (2,1.4);
+        \fill[red] (1,1) rectangle (2,1.4);
+
+        \fill[yellow] (1,0) rectangle (2,.4);
+        \fill[yellow] (1,.5) rectangle (2,.9);
+      }
+
+      \uncover<1,2>  {
+        \node[red] at (1,.9) [above left] {$E_3$};
+      }
+      
+      \uncover<1>  {
+        \draw (2,1) rectangle (3,1.4);
+        \fill[red] (2,1) rectangle (3,1.4);
+        \node[red] at (3,.9) [above right] {$E_2$};
+
+        \fill[yellow] (2,.5) rectangle (3,.9);
+        
+      }
+
+      \uncover<3>{
+        % Fix label covered in step 3 by $E_1$
+        \node[red] at (2,.9) [above right] {$E_3$};
+      }
+
+      \uncover<3,4> {
+        \draw (0,1) rectangle (2,1.4);
+        \fill[red] (0,1) rectangle (2,1.4);
+        \node[red] at (0,.9) [above left] {$E_1$};
+        \fill[yellow] (0,0) rectangle (2,.4);
+
+      }
+
+      \uncover<5->{
+        \draw (0,1) rectangle (2,1.4);
+        \fill[red] (0,1) rectangle (2,1.4);
+        \node[red] at (0,.9) [above left] {$E_1$};
+
+
+        \draw (1,1.5) rectangle (3,1.9);
+        \fill[red] (1,1.5) rectangle (3,1.9);
+        \node[red] at (1,1.4) [above left] {$E_2$};
+
+        \fill[yellow] (0,0) rectangle (2,.4);
+        \fill[yellow] (1,.5) rectangle (3,.9);  
+      }
+    \end{tikzpicture} 
+  \end{figure}
+
+  \only<1>{
+    We illustrate 1-OPT with the $n=k=2$ worst case defect set from before.  1-OPT starts with the greedy solution.
+  }
+
+  \only<2,3>{
+    It then removes each explanation in turn ($E_2$ in this case) and tries to replace it with an explanation that scores at least as much.
+  }
+
+  \only<3>{
+    Here $E_1$ was selected to replace $E_2$.
+  }
+
+  \only<4,5> {
+    Now we remove $E_3$ to try and improve the score.
+  }
+
+  \only<5> {
+    The best scoring maximal explanation remaining is $E_2$.
+  }
+
+  \only<6> {
+    We test to see if removing an explanation and replacing it can further improve the score.  Since it cannot, the algorithm terminates.
+  }
+
+\end{frame}
+
+\begin{frame}[t]{1-OPT Isn't Optimal}
+
+  \begin{figure}[H]
+    \begin{tikzpicture}[scale=1]
+
+      % 6 small rectangles on the left in 2 rows of 3
+      \foreach \x in {0,1,2} {
+        \foreach \y in {0,1} {
+          \draw (0+\x,0+\y/2) rectangle (.95+\x,.4+\y/2);
+          \fill[green] (0+\x,0+\y/2) rectangle (.95+\x,.4+\y/2);
+        }
+      }
+      
+      % 4 Wide caps on those small rectangles
+      \foreach \y in {0,1,2,3} {
+        \draw (0,1+\y/2) rectangle (2.95,1.4+\y/2);
+        \fill[green] (0,1+\y/2) rectangle (2.95,1.4+\y/2);
+      }
+
+      
+      \foreach \y in {0,1} {
+        \foreach \x in {4, 6} {
+          \draw (0+\x,0+\y/2) rectangle (.4+\x,.4+\y/2);
+          \fill[green] (0+\x,0+\y/2) rectangle (.4+\x,.4+\y/2);
+        }
+      }                  
+      \draw (4,1) rectangle (6.4,1.4);
+      \fill[green] (4,1) rectangle (6.4,1.4);
+
+      \uncover<2,4,6>{
+        \draw (0,-.5) rectangle (2.95, -.1);
+        \fill[red] (0,-.5) rectangle (2.95, -.1);
+        \node[red] at (0,-.6) [above left] {$E_1$};
+        \foreach \y in {0,1,2,3} {
+          \fill[yellow] (0,1+\y/2) rectangle (2.95,1.4+\y/2);
+        }
+      } %uncover<2.4>
+
+      \uncover<2,4,5>{
+        \draw (4,-.5) rectangle (4.4, -.1);
+        \fill[red] (4,-.5) rectangle (4.4, -.1);
+        \node[red] at (4,-.6) [above left] {$E_2$};
+        
+        \draw (6,-.5) rectangle (6.4, -.1);
+        \fill[red] (6,-.5) rectangle (6.4, -.1);
+        \node[red] at (6,-.6) [above left] {$E_3$};
+
+        
+        \foreach \y in {0,1,2} {
+          \foreach \x in {4, 6} {
+            \fill[yellow] (0+\x,0+\y/2) rectangle (.4+\x,.4+\y/2);
+          }
+        }                                               
+      } % uncover<2,4,5>
+
+      \uncover<6>{
+        \foreach \y in {0,1,2} {
+          \fill[yellow] (4,0+\y/2) rectangle (4.4,.4+\y/2);
+        }
+        \draw (4,-.5) rectangle (4.4, -.1);
+        \fill[red] (4,-.5) rectangle (4.4, -.1);
+        \node[red] at (4,-.6) [above left] {$E_2$};
+
+      }
+
+      \uncover<3,7>{
+        \foreach \x in {4,5,6} {
+          \draw (-4+\x,-.5) rectangle (-3.05+\x,-.1);
+          \fill[red] (-4+\x,-.5) rectangle (-3.05+\x,-.1);
+          \node[red] at (-3.5+\x,-1.2) [above] {$E_\x$};
+        }
+
+        \foreach \x in {0,1,2} {
+          \foreach \y in {0,1} {
+            \fill[yellow] (0+\x,0+\y/2) rectangle (.95+\x,.4+\y/2);
+          }
+        }
+        \foreach \y in {0,1,2,3} {
+          \fill[yellow] (0,1+\y/2) rectangle (2.95,1.4+\y/2);
+        }
+      } % uncover 3
+      
+    \end{tikzpicture}
+  \end{figure}          
+
+  \only<1>{  
+    Our starting defect set has a number of identical defects.  
+
+    We are going to explain these 15 defects with 3 explanations. 
+  }
+
+  \only<2>{
+    This is our bad solution.
+
+    $E_1$ scores 4.
+
+    Both $E_2$ and $E_3$ score $2+\epsilon$.
+
+    For a total of $8 + 2\epsilon$.
+  }
+
+  \only<3>{
+    This is the optimal solution.
+
+    Each of $E_4, E_5$ and $E_6$ score $3 \frac13$.
+
+    This total of $10$ beats our bad solution.
+  }
+
+  \only<4,5,6>{
+    Unfortunately, there is no good option for removal from the bad case.
+  }
+
+  \only<5>{
+    Without $E_1$ in place, $E_4, E_5$ and $E_6$ only score $3 \frac13$, which is lower than $E_1$'s score of 4.
+  }
+
+  \only<6>{
+    When $E_3$ is offered for exchange, $E_4, E_5$ and $E_6$ only score $2$ which is less than the $2+\epsilon$ that $E_3$ had scored.
+  }
+
+  \only<7>{
+    Unfortunately, this optimal arrangement cannot be reached from the starting point we chose.
+
+    This means that 1-OPT is not guaranteed to be optimal for $n>k$.
+  }
+
+\end{frame}
+
+\begin{frame}[t]{Dynamic Programming PTAS}
+
+\begin{figure}[ht!] \centering
+\begin{tikzpicture}[xscale=1,yscale=.25]
+
+\draw (4,0) rectangle (6,0.8);
+
+\draw (1,1) rectangle (5,1.8);
+\fill[red] (1,1) rectangle (5,1.8);
+
+\node[red] at (3,3) [above] {Active $S$};
+
+\draw (2,2) rectangle (6,2.8);
+\fill[red] (2,2) rectangle (5,2.8);
+
+\draw (0,0) rectangle (3,0.8);
+\fill[blue] (0,0) rectangle (3,0.8);
+
+\draw (0,2) rectangle (1,2.8);
+\fill[blue] (0,2) rectangle (1,2.8);
+
+\node[blue] at (0,0) [below] {Placed $E$};
+
+
+\draw (2,-.5) -- (2,3.3);
+\node[black] at (2,-.5) [below] {$a$};
+
+\draw (5,-.5) -- (5,3.3);
+\node[black] at (5,-.5) [below] {$b$};
+
+\end{tikzpicture} 
+\end{figure}
+
+\end{frame}
+
+\begin{frame}[t]{DP Updates}
+
+\begin{figure}[ht!] \centering
+\begin{tikzpicture}[xscale=1,yscale=.25]
+
+\coordinate (L1) at (1,0);
+\coordinate (R1) at (7,0.8);
+
+\coordinate (L2) at (2,1);
+\coordinate (R2) at (8,1.8);
+
+\coordinate (L3) at (4,2);
+\coordinate (R3) at (9,2.8);
+
+\coordinate (L4) at (6,3);
+\coordinate (R4) at (10,3.8);
+
+\coordinate (L5) at (3,3);
+\coordinate (R5) at (5,3.8);
+
+\foreach \rect in {1,2,3,4,5} {
+  \draw (L\rect) rectangle (R\rect);
+  \fill[blue] (L\rect) rectangle (R\rect);
+}
+
+\end{tikzpicture} 
+\end{figure}
+
+
 \end{frame}
 
 \section[Waiter]{Waiter Problem}
