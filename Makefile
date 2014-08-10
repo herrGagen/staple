@@ -1,4 +1,4 @@
-all: thesis.pdf presWaiter.pdf
+all: thesis.pdf presentation.pdf
 
 watch: thesis.tex
 	echo latexmk -pvc -view=pdf $< 
