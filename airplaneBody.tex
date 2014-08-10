@@ -83,7 +83,7 @@ While the general case allows passengers to fly together in arbitrarially large,
 
 \section{Hardness} \label{sec:hardness}
 
-For any case of the known NP-complete problem, 3 partition, there exists an initial passenger location assignment and family size combination where finding the minimum number of swaps possible would mean solving the 3-partition problem.  The reduction follows.
+For any case of the known NP-complete problem, 3-partition, there exists an initial passenger location assignment and family size combination where finding the minimum number of swaps possible would mean solving the 3-partition problem.  The reduction follows.
 
 The 3-partition problem is defined as: Given a set of $n = 3m$ integers $x_i$, is there a grouping of the $x_i$ into $m$ disjoint triplets so that the sum of each triplet is the same number $k$?
 
@@ -365,7 +365,7 @@ With this assignment, we can clearly see that all passengers are seated in an in
 \end{tikzpicture}
 \end{figure}
 
-To properly assign a structure to a seating arangement for singletons and couples that minimizes swaps, we generalize the above bad example.  Sets of paired individuals already seating by their partners are known as blocks.  Our bad example had $AABBCCDD$ all starting in good places, and thus we had a block of $N = 4$ couples.  Our block was out of alignment with our first seating type assignment and would require $N$ swaps to satisfy all seating requirements.  On the other hand, the block was in perfect alignment with the second seating type assignment and required no swaps to be seated.
+To properly assign a structure to a seating arangement for singletons and couples that minimizes swaps, we generalize the above bad example.  Sets of paired individuals already seating by their partners are called {\it blocks}.  Our bad example had $AABBCCDD$ all starting in good places, and thus we had a block of $N = 4$ couples.  Our block was out of alignment with our first seating type assignment and would require $N$ swaps to satisfy all seating requirements.  On the other hand, the block was in perfect alignment with the second seating type assignment and required no swaps to be seated.
 
 \begin{figure}[H]
 \centering
@@ -468,8 +468,12 @@ Diagramatically, we have:
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=.75]
-\draw (-0.3,0) node{$\hdots$};
-\foreach \x in {0, 1, 2, 3, 4}
+\draw (0.5,0) node{$\hdots$};
+
+\draw (1.8,.3) +(-.3,-.3) circle (.4);
+\draw (1.5,0) node{$O_0$};
+
+\foreach \x in {1, 2, 3, 4}
 {
   \draw (0.5+2*\x,0) +(-.4,-.3) rectangle ++(.4,.3);
   \draw (0.5+2*\x,0) node{$E_\x$};
@@ -480,15 +484,15 @@ Diagramatically, we have:
 \end{tikzpicture}
 \end{figure}
 
-If $E_i$, the block between odd gap $i$ and $i+1$ has $N_i$ paired couples, and we label the number of required swaps to fix parity $S(x,k)$ where $x$ is the index of the block we're moving and $k$ is the number of odd parity gaps we've closed.
+$E_i$, the block or $B_1EB_2E...B_k$ complex between odd gap $i-1$ and $i$ has $N_i$ paired couples.  We label the number of required swaps to fix parity $S(x,k)$ where $x$ is the index of the block we're moving and $k$ is the number of odd parity gaps we've closed.
 
 Our recurrence relation is: 
 
 \begin{equation*}
-  S(x,k) = \min_x S(x-2, k-2) + N_{x}
+  S(x,k) = \min S(x-2, k-2) + N_{x}, S(x-1,k)
 \end{equation*}
 
-Memoizing this table takes the number of odd gaps times the number of gaps we have to close.  Since each gap has to end with a block, the number of odd gaps is no more than $\frac13$ of our total number of seats.  Since we can't close more gaps than we have, this simple algorithm is, at worst, quadratic in number of passengers.  
+Memoizing this table takes the number of odd gaps times the number of gaps we have to close.  Since each odd gap lies between two blocks, the number of odd gaps is no more than $\frac13$ of our total number of seats.  We can't close more gaps than we have, so this simple algorithm is worst case quadratic in number of passengers.  
 
 \subsection{Performing the Swap Sweep}
 
@@ -569,7 +573,7 @@ Without loss of generality, we call the first, unaligned pair $A_1B_1$ and the s
 If a consecutive block of $N$ win-win pairs is misaligned, it requires $N$ more exchanges to satisfy all pairings than if they were all aligned.
 \end{cor}
 
-Win-win exchanges are 2 couples that can both be paired with a single exchange.  We would like to generalize this, calling win-win exchanges a two chain.  Three chains are three pairs that can all be satisfied with 2 exchanges like the example below:
+Win-win exchanges are 2 couples that can both be paired with a single exchange.  We would like to generalize this, calling win-win exchanges a 2-chain.  3-chains are three pairs that can all be satisfied with 2 exchanges like the example below:
 
 \begin{figure}[H]
 \centering

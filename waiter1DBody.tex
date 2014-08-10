@@ -56,13 +56,13 @@ Since our final center of mass is located at 0, and must be contained in our int
 \end{proof}
 
 \begin{thm}\label{thm:completeness}
-Given an instance of 3-partition where $ |x_i| = 3N, \forall_i \frac{1}{4} \leq x_i \leq \frac{1}{2} $, we can reduce it to an instance of the 1 dimensional waiter problem in polynomial time.  
+Given an instance of 3-partition where $ |x_i| = 3N, \forall_i \frac{1}{4} < x_i < \frac{1}{2} $, we can reduce it to an instance of the 1 dimensional waiter problem in polynomial time.  
 \end{thm}
 
 \begin{proof}
 Our set of weights will fall into 3 categories.  There will be $M$ masses to place at 0 (which will be the final center of mass), there will be $N$ masses to place at $-1$ and the remaining $3N$ masses will all be placed at the positions $x_i$ corresponding to our 3-partition instance.
 
-With this in hand, we can say that instead of requiring a non-polynomial reduction where $M$, the number of weights located at point 0, wasn't polynomial in input size and required we have that many weights in the instance, we can instead place those $M$ weights in $ O(1) $ time and tackle the remaining $ 3N + N$ weights in our reduction.
+By lemma \ref{lem:zerosChangeNothing}, we can say that instead of requiring a non-polynomial reduction where $M$, the number of weights located at point 0, wasn't polynomial in input size and required we have that many weights in the instance, we can instead place those $M$ weights in $ O(1) $ time and tackle the remaining $ 3N + N$ weights in our reduction.
 
 In order to remain in the interval $[0, \frac{1}{M}]$, whenever we seek to place one of our $x_i = -1$ weights, the running sum must be exactly 1.
 
@@ -74,10 +74,18 @@ x_i &\geq& (n+M) L - \Sigma = 0 - \Sigma \\
 x_i &\in& [ - \Sigma, 1 - \Sigma ]
 \end{eqnarray*}
 
-Positive $x_i$ weights can be placed whenever $x_i + \Sigma < 1$ and the negative values can be placed whenever $ -1 \in [\Sigma, 1-\Sigma] $, or $ \Sigma >= 1$.  But if $ \Sigma > 1$, we have the center of mass $ C = \frac{\Sigma}{n+M} \approx \frac{\Sigma}{M} > \frac{1}{M}$ where the approximation approaches equality as $ M \rightarrow \infty$.
+Positive $x_i$ weights can be placed whenever $x_i + \Sigma < 1$ and the negative values can be placed whenever $ -1 \in [\Sigma, 1-\Sigma] $, or $ \Sigma >= 1$.  But if $ \Sigma > 1$, we have the center of mass $ C = \frac{\Sigma}{k+M} \approx \frac{\Sigma}{M} > \frac{1}{M}$ where the approximation approaches equality as $ M \rightarrow \infty$.
 
 This means our negative weights can only be placed when $\Sigma = 1$, i.e. when three positive masses have been placed that sum to 1.  Deciding if this can be repeated $N$ times is exactly the 3-partition question, which is NP-hard.
 \end{proof}
+
+The requirement that $\frac{\Sigma}{n+M} \leq \frac{1}{M}$ for all $\Sigma$ can allow us to set a lower bound for $M$.  As the greatest value $k$ will hold is $4n$, this gives us the requirement that:
+
+\begin{equation*}
+\Sigma \leq 1 + \frac{4n}{M}
+\end{equation*}
+
+TO ensure this is never violated, we find the smallest sum of 3 or 4 $x_i$ that is strictly greater than 1 and call this sum $1+\epsilon$.  When $\epsilon > \frac{4n}{M}$, all sums of 3 elements that are greater than $1$ are greater than $1 + \frac{k}{M}$ for all $k\leq 4n$.  
 
 \section{Analytical Bounds}
 
@@ -424,7 +432,7 @@ If we view a table of $C(i,j)$ as a matrix, its upper left entry is $0$, its low
 
 In each row, there is a single lowest valued positive entry, and it occurs immediately after the single highest valued negative entry.  Similarly for columns, the lowest positive entry is before the highest negative entry.  Our algorithm starts with the staircase that includes the lowest valued positive entry of each row and column.  Since this staircase is never negative, its span is just its associated $R$ value.
 
-Our algorithm progresses by removing the highest valued $R$ from the staircase, located at $C(i,j)$ and inserting the negative element $C(i-1,j+1)$ in its place so that the staircase remains connected.  Now we update the $L$ value for the staircase to $min(L,C(i-1,j+1) )$, and update $R$ to the new highest valued positive member of the staircase. We note the span each time (and record the best), and stop when there are no positive elements left in the staircase.  Our initial sort took $O( (|p|+|n|) \log ((|p|+|n| )$ operations, and each of our $O(|n|+|p|)$ updates takes $O(1)$ operations.
+Our algorithm progresses by removing the highest valued $R$ from the staircase, located at $C(i,j)$ and inserting the negative element $C(i-1,j+1)$ in its place so that the staircase remains connected.  Now we update the $L$ value for the staircase to $min(L,C(i-1,j+1) )$, and update $R$ to the new highest valued positive member of the staircase. We note the span each time (and record the best to return), and stop when there are no positive elements left in the staircase.  Our initial sort took $O( (|p|+|n|) \log ((|p|+|n| )$ operations, and each of our $O(|n|+|p|)$ updates takes $O(1)$ operations.
 
 Generating the initial staircase is trivial. Since $C(0,1)$ has to be negative, $C(1,0)$ is the first element and our starting location.  When we are at positive $C(i,j)$ we can either add a negative element and get to $C(i,j+1)$ or add a positive element and wind up at $C(i+1,j)$. We do the first whenever $C(i,j+1) \geq 0$, and the second otherwise. This required $O(|p|+ |n|)$ operations.
 
@@ -436,7 +444,7 @@ This requires some steps.
 
 \subsubsection{Proof of Staircase Optimality}
 
-We need a few lemmas to prove theorem \label{thm:staircaseIsOpt}.
+We need a few lemmas to prove theorem \ref{thm:staircaseIsOpt}.
 
 \begin{lem} \label{lem:staircaseOrdering}
 $\forall_{i,j,k>1} C(i,j+k) \leq C(i,j)$
@@ -556,16 +564,18 @@ In the following discussion, ``the interval'' will be used as shorthand to mean 
 Almost all of our heuristics start by separating our inputs into positive and negative lists and sorting those lists by absolute value.  When either positive or negative elements are placed, they are placed in order of increasing magnitude. We will note algorithms which do not do this by calling them unsorted.
 
 \begin{enumerate}
-\item \texttt{SortedPoints}
-This very naive heuristic places points in order of increasing magnitude.  This heuristic performs poorly on the case shown in section \ref{subs:naiveCounter} and is expected to have worst case behavior no better than an $O(\sqrt{n})$ times the width of the optimal solution.
+\item \texttt{GreedyCentroid}
+  This algorithm belongs to our family of sorted algorithms.  At each step, it places the smallest magnitude remaining positive or negative candidate that minimizes the absolute value of the next step's center of mass. 
 
 \item \texttt{PositvesNegatives}
   This sorted algorithm seeks to keep the center of mass positive by placing positive elements in order of increasing magnitude and only placing the next largest magnitude negative element when its inclusion will not make the center of mass negative.
 
 This is repeated for keeping the CoM negative and the smaller interval order is returned.
 
-\item \texttt{GreedyCentroid}
-  This algorithm belongs to our family of sorted algorithms.  At each step, it places the smallest magnitude remaining positive or negative candidate that minimizes the aboslute value of the next step's center of mass. 
+\item \texttt{PriceIsRight}
+The price is right is an unsorted algorithm that optimizes the interval width of the yes/no question: can applying this heuristic keep the center of mass inside of a given input interval $[L,R]$?
+
+At each step the price is right heuristic places the mass that moves the CoM closest to one of its endpoints without going past it.  See its writeup in section \ref{subs:PIR} for more details.
 
 \item \texttt{SlowGrow}
 This greedy, sorted algorithm seeks to increase the width of the interval containing the CoM by the smallest amount each step.  It does so by placing the smallest positive or negative element if doing so would not increase the width of the interval, or selecting the element that increases the interval width by the smallest amount. 
@@ -573,21 +583,18 @@ This greedy, sorted algorithm seeks to increase the width of the interval contai
 \item \texttt{SortedMidpoint}
 This is very similar to SlowGrow.  It seeks to independently minimize the values of $|L|$ and $|R|$ by placing the smallest positive or negative element if the resultant CoM is within the curent interval, or if they both would result in increasing the width of the interval, placing the point whose resultant center of mass has the smallest magnitude.
 
-\item \texttt{Tentpole}
-The tentpole heuristic seeks to keep us from making a bad decision that will allow the center of mass to grow larger than it has to.  It places the lowest magnitude mass first.  
+\item \texttt{SortedPoints}
+This very naive heuristic places points in order of increasing magnitude.  This heuristic performs poorly on the case shown in section \ref{subs:naiveCounter} and is expected to have worst case behavior no better than an $O(\sqrt{n})$ times the width of the optimal solution.
 
-At each step it places masses of the same sign (positive or negative) until the magnitude of the running sum of masses placed plus the next candidate of the same sign is greater than the magnitude of the candidate of the opposite sign.  Once this happens, the opposite sign candidate is placed and this becomes the active sign.
+\item \texttt{Staircase} The best possible algorithm that uses sorted placements. For each relevant $R$, it finds the path with minimum $|L|$ whose CoM is never less than $L$.   See its writeup in section \ref{subs:Staircase}.
+
+\item \texttt{Tentpole}
+This sorted heuristic seeks to keep us from making a bad decision that will allow the center of mass to grow larger than it has to.  At each step it places masses of the same sign (positive or negative) until the magnitude of the running sum of masses placed plus the next candidate of the same sign is greater than the magnitude of the candidate of the opposite sign.  Once this happens, the opposite sign candidate is placed and this becomes the active sign.
+
 
 \item \texttt{TentpoleLB}
 
 This is not a solver algorithm, it calculates the absolute lower bound for $|R-L|$ defined in theorem \ref{thm:tentpoleBound} by determining the tentpole ordering and then finding the maximum of the two quantities $\frac{p_i}{\pi^+_i},\frac{|n_i|}{\pi^-_i}$, which is an occasionally tight lower bound on optimum $|R-L|$.
-
-\item \texttt{Staircase} The best possible algorithm that uses sorted placements. For each relevant $|L|$, it finds the path with minimum $R$ whose CoM is never less than $L$.   See its writeup in section \ref{subs:Staircase}.
-
-\item \texttt{PriceIsRight}
-The price is right is an unsorted algorithm that optimizes the interval width of the yes/no question: can applying this heuristic keep the center of mass inside of a given input interval $[L,R]$?
-
-At each step the price is right heuristic places the mass that moves the CoM closest to one of its endpoints without going past it.  See its writeup in section \ref{subs:PIR} for more details.
 
 \end{enumerate}
 
@@ -609,8 +616,8 @@ SlowGrow& 1& 1.63& 1.08& 0.09& 1000000\\
 SortedMidpoint& 1& 1.63& 1.08& 0.09& 1000000\\ 
 SortedPoints& 1& 3.13& 1.65& 0.34& 1000000\\ 
 Staircase& 1& 1.38& 1.03& 0.05& 1000000\\ 
+Tentpole& 1& 1.98& 1.24& 0.18& 1000000\\ \hline
 TentpoleLB& 0.55& 1& 0.89& 0.08& 1000000\\ 
-Tentpole& 1& 1.98& 1.24& 0.18& 1000000\\ 
 \hline
 \end{tabular}
 \caption{Algorithm performance on 10 input points drawn from a Normal(0,1) distribution and then fixed using the transformation: $y_i \rightarrow \frac{y_i - \bar{y} }{\max(|y_i| - \bar{y}) }$ }
@@ -639,7 +646,7 @@ SlowGrow & 1.55 & 1.55 & 1 & \textbf{1.63} & 1.63 & 1.43 & 1 & 1.63 & 1\\
 SortedMidpoint & 1.55 & 1.55 & 1 & 1.63 & \textbf{1.63} & 1.43 & 1 & 1.63 & 1\\ 
 SortedPoints & 1 & 1.64 & 1 & 1 & 1 & \textbf{3.13} & 1 & 1 & 0.91 \\ 
 Staircase & 1.39 & 1.39 & 1 & 1.39 & 1.39 & 1.53 & \textbf{1.38} & 1.39 & 0.92\\ 
-Tentpole & 1.86 & 1.97 & 1 & 1.02 & 1.02 & 1.98 & 1 &  \textbf{1.98} &0.98\\ 
+Tentpole & 1.86 & 1.97 & 1 & 1.02 & 1.02 & 1.98 & 1 &  \textbf{1.98} &0.98\\ \hline
 TentpoleLB & 1.53 & 1.53 & 1.01 & 1.01 & 1.01 & 1.79 & 1.01 & 1.31 & \textbf{1}\\ 
 \hline 
  \end{tabular}
@@ -647,14 +654,17 @@ TentpoleLB & 1.53 & 1.53 & 1.01 & 1.01 & 1.01 & 1.79 & 1.01 & 1.31 & \textbf{1}\
   \label{table:worstCases}
 \end{table*}
 
-For each algorithm, we noted which inputs it struggled with the most.  Since all algorithms were run on the same inputs, we summarize in table \ref{table:worstCases} how algorithms solved each other's toughest cases.  Though \texttt{PriceIsRight} outperforms all other algorithms on their own worst cases, both \texttt{SlowGrow} and \texttt{SortedMidpoint} outperform \texttt{PriceIsRight} on its own worst case scenario, and the worst scenario for \texttt{Tentpole}.
+For each algorithm, we noted which inputs it struggled with the most.  Since all algorithms were run on the same inputs, we summarize in table \ref{table:worstCases} how algorithms solved each other's toughest cases.  Though \texttt{PriceIsRight} outperforms all other algorithms on their own worst cases, \texttt{SlowGrow}, \texttt{SortedMidpoint} and \texttt{Staircase} outperform \texttt{PriceIsRight} on its own worst case scenario, and \texttt{Staircase} outperforms it on \texttt{GreedyCentroid}'s worst case.
 
-Since \texttt{OPTSorted} was analytically shown to dominate \texttt{Tentpole} and \texttt{SlowGrow}, it is nice to see the numbers bear this out.  The numbers also allow us to abandon the three algorithms whose performance could be arbitrarially bad: \texttt{GreedyCentroid}, \texttt{PositivesNegatives} and \texttt{SortedPoints}.  As the running time of all algorithms that are not \texttt{PriceIsRight} is $O(n \log n)$, these badly performing algorithms algorithms have no competitive advantage.
+Since \texttt{Staircase} was analytically shown to dominate \texttt{Tentpole} and \texttt{SlowGrow}, it is nice to see the numbers bear this out.  The numbers also allow us to abandon the three algorithms whose performance could be arbitrarially bad: \texttt{GreedyCentroid}, \texttt{PositivesNegatives} and \texttt{SortedPoints}.  As the running time of all algorithms that are not \texttt{PriceIsRight} is $O(n \log n)$, these badly performing algorithms have no competitive advantage.  
 
+Since \texttt{Tentpole} was soundly beaten by the remaining algorithms, it is likely that a more careful analysis will show a tighter bound on \texttt{Staircase} than the 2.7 it inherited by dominating all sorted algorithms, including \texttt{Tentpole}.
 
 \section{Conclusion}
 
-In this paper, we introduced a new balanced packing problem, the waiter problem.  Our initial results in one dimension are promising: we devised two simple heuristics based on sorting (\texttt{slowGrow} and \texttt{tentpole}) that give us 2.7 factor approximations to the smallest interval in which we can trap our center of mass.  Further experimental tests showed that another of our proposed algorithms, \texttt{priceIsRight} outperforms both of these algorithms on a large number of test cases.
+In this paper we introduced a new, NP-complete, balanced packing problem: the waiter problem.  Our initial results in one dimension were promising.  We devised a number of simple heuristics based on sorting.  For one of them, \texttt{Tentpole}, we were able to prove that it was a 2.7 factor approximation algorithm.  Initial experimental tests showed that another of our proposed algorithms, \texttt{PriceIsRight} outperforms the other heuristics on a large number of test cases.
 
-Though we would like to extend the work to two dimensions, we note that the real world applications to airplane loading are well served with a one dimensional approximation.  
+We then devised a \texttt{Staircase} algorithm which is the best possible sorted algorithm.  This algorithm's dominance over the earlier sorted algorithms was experimentally verfied, and the non-sorted \texttt{PriceIsRight} algorithm was shown to occasionally outperform it.
+
+Though we plan to extend the work to two dimensions, we note that the real world applications to airplane loading are well served with a one dimensional approximation.  
 

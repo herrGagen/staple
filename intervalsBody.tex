@@ -27,7 +27,8 @@ When two explanations $e_i,e_j$ overlap and both are a subset of a defect, they 
 
 Goal : Given $k$ explanations, cover the maximum fraction of $D$.
 
-\subsection{Definitions}
+\subsection{Definitions} 
+\label{sec:definitions}
 
 For the problem at hand, we have a set of defects $D = \{d_i\}$.  The endpoints of these defects are the integers $l_i, r_i$.  
 
@@ -859,7 +860,7 @@ For $d > 2$, the process outlined in section~\ref{sec:exhaustiveEnumeration} is 
 We used the open source ipopt non-linear programming solver described in \cite{wachter2006implementation} to solve the many quadratic programs that this procedure generates.  Our numerical results follow:
 
 \begin{tabular}{l|l}
-k & score \\ \hline
+$d$ & Lower Bound \\ \hline
 2 & .655 \\ 
 3 & .698 \\
 4 & .736 \\
@@ -867,31 +868,21 @@ k & score \\ \hline
 6 & .773 \\
 \end{tabular}
 
-Recalling that the dynamic program runs in $O(|E|^{k})$, and that we should expect $|E| \geq 1000$, the dynamic program for $k=4$ is going to take of order an hour on modern hardware, and $k=5$ will take upwards of a month.
+While these bounds are encouraging, the dynamic program runs in $O(|E|^{d})$.  Since we expect $|E| \geq 1000$, the dynamic program for $d=4$ is going to take of order an hour on modern hardware, and $d=5$ will take upwards of a month.
 
 \subsection{Linear Programming Relaxation / Binary Programming} \label{sec:IP}
 
 We are going to employ an LP relaxation in our numerical studies to determine how close to optimal our solution is.  We'll also see how frequently a cutting plane method can find a feasible, optimal solution to the integer program.
 
-In order to turn our problem into an LP, we need to define one new concept, the defect primitive. 
+In order to turn our problem into an LP, we need to use defect primitives.  These were defined in section \ref{sec:definitions}.
 
-With defect primitives in hand, we can define our Linear Program:
-
-Maximize the weighted sum of defect primitives explained subject to:
-
-\begin{enumerate}
-\item Each defect primitive is only explained if a covering explanation is in the set {\bf $E$}.
-
-\item We have no more than $k$ explanations in {\bf $E$}.
-
-\item Primitives can only be counted once for score.
-\end{enumerate}
+With defect primitives in hand, we can define a linear program that maximizes the weighted sum of defect primitives explained.  The constraints are that each defect primitive is only explained if a covering explanation is in the set {\bf $E$}.  We have no more than $k$ explanations in {\bf $E$}.  Primitives can only be counted once for score.
 
 Our variables are: 
 
-$e_i$: 0 if explanation $E_i$ is not in our explanation set, and 1 if it is.
+$e_i$: 1 if explanation $E_i$ is in our explanation set, and 0 if not.
 
-$p_{i,j}$: 0 if defect primitive $d_{i,j}$, a part of defect $D_i$, is explained, 0 if it is not.
+$p_{i,j}$: 1 if defect primitive $d_{i,j}$ is explained, 0 if it is not.
 
 Note: $|d_{i,j}|$ and $|D_i|$ are constant lengths.
 
@@ -1009,16 +1000,18 @@ We made the objective function to minimize the performance of each algorithm in 
 
 \subsection{$N=K$ Results}
 
-When $N=K$, the optimal solution would be simply to put one explanation per defect.  This trivial OPT makes these calculations fast.
+When $N=K$, the trivially optimal solution would be one explanation identical to each defect.  Since 1-OPT and IP were uniformly optimal for these cases, they are not shown.
 
-\begin{tabular}{l|lllll}
-{\bf Algo.} & DP 1 & DP 2 & Greedy & 1-OPT  & IP \\ \hline
+\vspace{6pt}
+
+\begin{tabular}{l|llll}
+{\bf Alg.} & DP 1 & Greedy & DP 2 \\ \hline
 {\bf $(N,K)$ } \\
-(2, 2) & 0.5 & 1 & 0.753 & 1 & 1 \\
-(3, 3) & 0.667 & 0.899 & 0.788 & 1 & 1\\
-(4, 4) & 0.75 & 0.9 & 0.778 & 1 & 1 \\
-(5, 5) & 0.753 & 0.913 & 0.817 & 1 & 1 \\
-(6, 6) & 0.774 & 0.907 & 0.819 & 1 & 1 \\
+(2, 2) & 0.50 & 0.75  & 1    \\
+(3, 3) & 0.67 & 0.79  & 0.90 \\
+(4, 4) & 0.75 & 0.78  & 0.90 \\
+(5, 5) & 0.75 & 0.82  & 0.91 \\
+(6, 6) & 0.77 & 0.82  & 0.91 \\
 \end{tabular}
 
 \subsection{$N \leq k$}
@@ -1080,7 +1073,9 @@ The exact same pattern holds, with our algorithms from worst to best being one d
   \end{tikzpicture}
   \caption{Results for placing $2-5$ explanations to cover $5$ defects.}
 \end{figure}
+
 \FloatBarrier
+
 Here, while the rankings don't change, the 2-depth dynamic program held its lead for all but the $N=K$ case.  Considering that 1-OPT will always find the optimal solution in an $N=k$ case, and that real life scenarios are characterized by $N>>k$, this result strongly suggests that the 2 depth dynamic program outperforms the other three heuristics.  
 
 The clear winner was binary programming (not shown).  In all but 4 of the genome evaluations (out of ~1.6 million), the MILP solver from COIN-OR produced an optimal output.  If it scales well for problems of real world applicationsize, it would be the best algorithm to use in practice.
@@ -1099,12 +1094,12 @@ To illustrate algorithm running times on smallscale problems, we generated 1024 
         /pgfplots/xtick={1,2,4},
         legend style={at={(.5,-.25)},anchor=north,legend columns=3},
       ]
-      \addplot+[smooth] coordinates {(1, 0.04) (2, 0.064) (4, 0.084) };    
-      \addplot+[smooth] coordinates {(1, 3.624) (2, 7.848 ) (4, 14.436) };    
-      \addplot+[smooth] coordinates {(1, 0.28) (2,0.32 ) (4,0.68 ) };    
-      \addplot+[smooth] coordinates {(1, 1.1 ) (2,1.15 ) (4,1.08 ) };    
-      \addplot+[smooth] coordinates {(1, .044) (2, .104) (4, .352 ) };    
-      \legend {DP 1, DP 2, Greedy,  LP, 1-OPT}
+      \addplot+[smooth] coordinates {(1, 0.048) (2,0.072) (4, 0.092) };    
+      \addplot+[smooth] coordinates {(1, 0.028) (2,0.032) (4, 0.052) };    
+      \addplot+[smooth] coordinates {(1, 1.076) (2,1.144) (4, 0.952) };    
+      \addplot+[smooth] coordinates {(1, 0.044) (2,0.104) (4, 0.352) };    
+      \addplot+[smooth] coordinates {(1, 3.624) (2,7.848) (4,14.436) };    
+      \legend {DP 1, Greedy,  LP, 1-OPT, DP 2}
     \end{axis}
   \end{tikzpicture}
   \caption{Time to place $k$ explanations to cover 4 defects.}
@@ -1117,17 +1112,35 @@ Even for small cases, the depth 2 dynamic program is more than 10 times slower t
   \begin{tikzpicture}[yscale=.8]
     \begin{axis}[ title={Time in seconds, $N=8$}, 
         xlabel=k,
-        /pgfplots/xtick={1,2,4},
+        /pgfplots/xtick={2,4,8},
         legend style={at={(.5,-.25)},anchor=north,legend columns=4},
       ]
-      \addplot+[smooth] coordinates {(1, 0.04) (2, 0.064) (4, 0.084) };    
-      \addplot+[smooth] coordinates {(1, 0.28) (2,0.32 ) (4,0.68 ) };    
-      \addplot+[smooth] coordinates {(1, 1.1 ) (2,1.15 ) (4,1.08 ) };    
-      \addplot+[smooth] coordinates {(1, .044) (2, .104) (4, .352 ) };    
+      \addplot+[smooth] coordinates {(2, 0.508) (4,1.096) (8,1.632) };    
+      \addplot+[smooth] coordinates {(2, 0.144) (4,0.284) (8,0.628) };    
+      \addplot+[smooth] coordinates {(2, 2.268) (4,2.160) (8,1.916) };    
+      \addplot+[smooth] coordinates {(2, 0.488) (4,2.052) (8,12.280) };    
       \legend {DP 1, Greedy,  LP, 1-OPT}
     \end{axis}
   \end{tikzpicture}
   \caption{Time to place $k$ explanations to cover 8 defects.}
+\end{figure}
+
+1-OPT's scaling is so much greater than the other algorithms that it is masking the story.  The dynamic program and greedy algorithm are both requiring more time as $k$ increases while the LP, surprisingly, requires less.
+
+\begin{figure}[ht!] \centering
+  \begin{tikzpicture}[yscale=.8]
+    \begin{axis}[ title={Time in seconds, $N=8$}, 
+        xlabel=k,
+        /pgfplots/xtick={2,4,8},
+        legend style={at={(.5,-.25)},anchor=north,legend columns=4},
+      ]
+      \addplot+[smooth] coordinates {(2, 0.508) (4,1.096) (8,1.632) };    
+      \addplot+[smooth] coordinates {(2, 0.144) (4,0.284) (8,0.628) };    
+      \addplot+[smooth] coordinates {(2, 2.268) (4,2.160) (8,1.916) };    
+      \legend {DP 1, Greedy,  LP}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Time to place $k$ explanations to cover 8 defects (without 1-OPT).}
 \end{figure}
 
 \begin{figure}[ht!] \centering
@@ -1137,28 +1150,28 @@ Even for small cases, the depth 2 dynamic program is more than 10 times slower t
         /pgfplots/xtick={4,8,16},
         legend style={at={(.5,-.25)},anchor=north,legend columns=4},
       ]
-      \addplot+[smooth] coordinates {(4, 2.39) (8,4.44 ) (16,6.32 ) };    
-      \addplot+[smooth] coordinates {(4,0.244 ) (8,0.568 ) (16,1.126 ) };    
-      \addplot+[smooth] coordinates {(4,1.716 ) (8,1.456 ) (16,1.272 ) };    
-      \addplot+[smooth] coordinates {(4,2.15 ) (8,11.2 ) (16,67.6 ) };    
-      \legend {DP 1, Greedy,  LP, 1-OPT}
+      \addplot+[smooth] coordinates {(4,19.000) (8,36.452) (16, 50.432) };    
+      \addplot+[smooth] coordinates {(4, 1.940) (8, 4.572) (16, 10.040) };    
+      \addplot+[smooth] coordinates {(4,11.400) (8,10.240) (16,  8.812) };    
+      \legend {DP 1, Greedy,  LP}
     \end{axis}
   \end{tikzpicture}
   \caption{Time to place $k$ explanations to cover 16 defects.}
 \end{figure}
 
+The $N=16$ and $N=32$ graphs tell the same story. Greedy scales linearly with $k$, the LP takes marginally less time as $k$ increases and the DP scales as either $\sqrt{k}$ or $\log{k}$ but with large enough $n$ dependent scaling to be slow
+
 \begin{figure}[ht!] \centering
   \begin{tikzpicture}[yscale=.8]
-    \begin{axis}[ title={Time in minutes, $N=32$}, 
+    \begin{axis}[ title={Time in {\bf minutes}, $N=32$}, 
         xlabel=k,
-        /pgfplots/xtick={8,16, 32},
+        /pgfplots/xtick={8,16,32},
         legend style={at={(.5,-.25)},anchor=north,legend columns=4},
       ]
-      \addplot+[smooth] coordinates {(8,11.2 ) (16,19.8 ) (32,27.6) };    
-      \addplot+[smooth] coordinates {(8,0.6 ) (16,1.35 ) (32,2.9) };    
-      \addplot+[smooth] coordinates {(8,6.25 ) (16,5.9) (32,5.6) };    
-      \addplot+[smooth] coordinates {(8,14.9 ) (16,66.5 ) (32,422.75) };    
-      \legend {DP 1, Greedy,  LP, 1-OPT}
+      \addplot+[smooth] coordinates {(8,11.217) (16,19.764) (32, 27.598) };    
+      \addplot+[smooth] coordinates {(8, 0.586) (16, 1.377) (32,  2.932) };    
+      \addplot+[smooth] coordinates {(8, 6.293) (16, 5.939) (32,  5.634) };    
+      \legend {DP 1, Greedy,  LP}
     \end{axis}
   \end{tikzpicture}
   \caption{Time to place $k$ explanations to cover 32 defects.}
@@ -1194,7 +1207,7 @@ The running time dependence on $k$ for the 2-Depth dynamic program is exactly as
         xlabel=N,
         ymode=log,
         xmode=log,
-        legend style={at={(.5,-.25)},anchor=north,legend columns=2},
+        legend style={at={(.5,-.25)},anchor=north,legend columns=3},
       ]
       \addplot+[smooth] coordinates {(2, 0.064) (3, 0.200) (4, 0.500) (5, 1.172) (6, 1.956) (7, 3.872) (8, 8.448) (9, 10.992) (10, 20.5) (11, 33.8) (12, 53.7)};
       \addplot+[smooth] coordinates {(2, 0.084) (3, 0.344) (4, 0.908) (5, 2.2) (6, 4.54) (7, 10.2) (8, 20.4) (9, 38.3) (10, 88.6) (11, 168) (12, 297)};
@@ -1205,7 +1218,7 @@ The running time dependence on $k$ for the 2-Depth dynamic program is exactly as
   \caption{Timing data for the 2-depth dynamic program as a function of $N$}
 \end{figure}
 
-On the other hand, the pessimistic $O(kN^{k+2})$ upper bound on running time is exactly that, pessimistic. The best fitting line's slope for the log-log plot with $k=2$ was 3.78, and for $k=4$ it was 4.26, and 5.21 for $k=8$. We hypothesize that they are below the pessimistic $4, 6$ and $10$, because that bound would require our defect set be of depth $O(N)$ for the majority of times we encounter an endpoint. 
+On the other hand, the pessimistic $O(kN^{k+2})$ upper bound on running time is exactly that, pessimistic. The best fitting line's slope for the log-log plot with $k=2$ was 3.78, and for $k=4$ it was 4.26, and 5.21 for $k=8$. We hypothesize that these coefficients are below the worst case powers of $4, 6$ and $10$ because that bound occurs when our defect set is of depth $O(N)$ for the majority of times we encounter an endpoint. 
 
 If this hypothesis holds, it's possible that the structure of real data will allow for even better running times for the dynamic programming algorithm than did our synthetic data.
 
